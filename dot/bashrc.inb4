@@ -7,3 +7,6 @@ c() {
     st 2>/dev/null | head -1
 }
 
+cpd() {
+    cpd.py
+}
