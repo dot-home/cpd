@@ -1,0 +1,9 @@
+c() {
+    pwd -P >/dev/null 2>&1 || command cd "$HOME"
+    local dir="$(find-co-dir -c "$@")"
+    [[ -n $dir ]] || return 1
+    cd "$dir" || return 1
+    xtitle || true
+    st 2>/dev/null | head -1
+}
+
