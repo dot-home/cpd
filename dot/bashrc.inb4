@@ -1,12 +1,14 @@
-c() {
-    pwd -P >/dev/null 2>&1 || command cd "$HOME"
-    local dir="$(find-co-dir -c "$@")"
+cpd() {
+    local dir="$(cpd.py "$@" | head -1)"
     [[ -n $dir ]] || return 1
     cd "$dir" || return 1
-    xtitle || true
-    st 2>/dev/null | head -1
 }
 
-cpd() {
-    cpd.py
+__cpd_complete() {
+    local comp
+    COMPREPLY=('')                  # To avoid adding a common prefix
+    while read -d $'\0' comp; do
+        COMPREPLY+=("$comp")
+    done < <(cpd.py --complete-words "${COMP_WORDS[@]}")
 }
+complete -F __cpd_complete cpd
