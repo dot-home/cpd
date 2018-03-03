@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 set -e -o pipefail
 
-basedir="$(dirname "$BASH_SOURCE")"
+basedir="$(cd "$(dirname "$BASH_SOURCE")" && pwd -P)"
 cd "$basedir"
 . activate
 
 echo ===== Unit Tests
 pytest -q bin/cpd.py
 
-echo ===== Integration Tests
-. dot/bashrc.inb4
-PATH="${basedir}/bin:$PATH"
-cpd
+echo ===== Functional Test
+export HOME=${basedir}/t/home
+diff -u <<. - <(${basedir}/bin/cpd.py a p)
+$HOME/p2/abc
+$HOME/p1/abc
+.
