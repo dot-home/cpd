@@ -1,26 +1,88 @@
 #!/usr/bin/env python
 
 from argparse import ArgumentParser
+from fnmatch import fnmatch
 from os import environ
-from os.path import expanduser
+from os.path import expanduser, split as pathsplit
 import sys
 
 project_path_globs_file = '~/.config/cpd/path-globs'
-
-def test_nothing():
-    assert True
 
 def readconfig():
     with open(expanduser(project_path_globs_file), 'r') as f:
         return map(str.strip, f.readlines())
 
-def pdmatches(project_path_globs, component_globs):
-    ''' From all paths matching `project_path_globs`, return the ones
-        that have components matching all `component_globs`.
-
-        `~` will be expanded to `$HOME` in project_path_globs
+def expand_pdglobs(pdglobs):
+    ''' Expand the list of globs to a list of filesystem paths that are
+        directories that match the globs. `~` expansion is performed.
     '''
-    return []
+    return pdglobs
+
+def test_pdmatches():
+    p1  = '/projects/one'
+    p3  = '/projects/three'
+    hp1 = '/home/foo/projects/one'
+    hp2 = '/home/foo/projects/two'
+    pps = [ p1, p3, hp1, hp2 ]
+    assert pdmatches(pps, ['no-match']) == []
+    assert pdmatches(pps, ['on'])       == [ p1, hp1 ]
+    assert pdmatches(pps, ['ho'])       == [ hp1, hp2 ]
+    assert pdmatches(pps, ['on', 'ho']) == [ hp1 ]
+    assert pdmatches(pps, ['on', 'tw']) == [ ]
+
+def pdmatches(project_paths, component_globs):
+    ''' Return all paths from `project_paths` that have components
+        matching all `component_globs`. Each component_glob has an
+        implied `*` at the end.
+    '''
+    return filter(
+        lambda path:
+            all(glob_match(path, glob) for glob in component_globs),
+        project_paths)
+
+def test_glob_match():
+    path = '/foo/bar/baz/quux'  # No 'g's in here!
+    matches = [ '', '*',
+        'foo', 'f',
+        'b', 'bar', 'b*', 'bar*',
+        'quu', '*quu',
+        '?a', '[abc]a',
+        ]
+    non_matches = [
+        'g', '*g', 'x*', 'quuxz*', '?b', '[ac]a',
+        '/', # We don't currently support matches across multiple components.
+        ]
+    for m in matches:
+        assert glob_match(path, m)
+    for n in non_matches:
+        assert not glob_match(path, n)
+
+def glob_match(path, glob):
+    return any(fnmatch(component, glob + '*')
+               for component in pathcomponents(path))
+
+def test_pathcomponents():
+    p = pathcomponents
+    assert p('')                == ['']
+    assert p('/')               == ['']
+    assert p('foo')             == ['foo']
+    assert p('foo')             == ['foo']
+    assert p('/foo')            == ['foo']
+    assert p('foo/')            == ['foo', '']
+    assert p('/foo/')           == ['foo', '']
+    assert p('foo/bar')         == ['foo', 'bar']
+    assert p('/foo/bar')        == ['foo', 'bar']
+    assert p('foo/bar/')        == ['foo', 'bar', '']
+    assert p('/foo/bar/')       == ['foo', 'bar', '']
+    assert p('/foo///bar/')     == ['foo', 'bar', '']
+    assert p('/a/b/c/d/e')      == ['a', 'b', 'c', 'd', 'e']
+
+def pathcomponents(path):
+    prefix, component = pathsplit(path)
+    if prefix not in ['', '/']:         # Fixed point
+        return pathcomponents(prefix) + [component]
+    else:
+        return [component]
 
 def main():
     parser = ArgumentParser(description='''
@@ -45,7 +107,7 @@ def main():
 
     separator = '\n'
     if args.complete_words: separator = '\0'
-    for match in pdmatches(readconfig(), args.component_glob):
+    for match in pdmatches(expand_pdglobs(readconfig()), args.component_glob):
         sys.stdout.write(match)
         sys.stdout.write(separator)
 
