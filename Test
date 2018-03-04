@@ -9,8 +9,10 @@ echo ===== Unit Tests
 pytest -q bin/cpd.py
 
 echo ===== Functional Test
-export HOME=${basedir}/t/home
-diff -u <<. - <(${basedir}/bin/cpd.py a p)
+export HOME="${basedir}/t/home"
+export PATH="${basedir}/bin:$PATH"
+. ${basedir}/dot/bashrc.inb4
+diff -u <<. - <(cpd -l a p 2>&1)
 $HOME/p2/abc
 $HOME/p1/abc
 .

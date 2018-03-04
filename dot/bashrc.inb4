@@ -1,7 +1,13 @@
 cpd() {
-    local dir="$(cpd.py "$@" | head -1)"
-    [[ -n $dir ]] || return 1
-    cd "$dir" || return 1
+    local list_mode=false
+    [[ $1 = -l ]] && { list_mode=true; shift; }
+    if $list_mode; then
+        cpd.py "$@"
+    else
+        local dir="$(cpd.py "$@" | head -1)"
+        [[ -n $dir ]] || return 1
+        cd "$dir" || return 1
+    fi
 }
 
 __cpd_complete() {
