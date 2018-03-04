@@ -1,14 +1,25 @@
 #!/usr/bin/env python
 
-import sys
 from argparse import ArgumentParser
+from os import environ
+from os.path import expanduser
+import sys
 
 project_path_globs_file = '~/.config/cpd/path-globs'
 
 def test_nothing():
     assert True
 
-def pdmatches(component_globs):
+def readconfig():
+    with open(expanduser(project_path_globs_file), 'r') as f:
+        return map(str.strip, f.readlines())
+
+def pdmatches(project_path_globs, component_globs):
+    ''' From all paths matching `project_path_globs`, return the ones
+        that have components matching all `component_globs`.
+
+        `~` will be expanded to `$HOME` in project_path_globs
+    '''
     return []
 
 def main():
@@ -22,7 +33,7 @@ def main():
 
         A set of component globs is given on the command line, and
         each project path matching all component globs is printed.
-        
+
         ''' % project_path_globs_file)
     parser.add_argument('--complete-words', action='store_true', help='''
         Return list of matching project paths separated by null char.
@@ -34,7 +45,7 @@ def main():
 
     separator = '\n'
     if args.complete_words: separator = '\0'
-    for match in pdmatches(args.component_glob):
+    for match in pdmatches(readconfig(), args.component_glob):
         sys.stdout.write(match)
         sys.stdout.write(separator)
 
