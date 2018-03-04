@@ -7,7 +7,7 @@ from os import environ
 from os.path import expanduser, split as pathsplit
 import sys
 
-project_path_globs_file = '~/.config/cpd/path-globs'
+project_path_globs_file = '~/.config/cpd/project-paths'
 
 def readconfig():
     with open(expanduser(project_path_globs_file), 'r') as f:
