@@ -2,6 +2,7 @@
 
 from argparse import ArgumentParser
 from fnmatch import fnmatch
+from glob import glob
 from os import environ
 from os.path import expanduser, split as pathsplit
 import sys
@@ -16,7 +17,7 @@ def expand_pdglobs(pdglobs):
     ''' Expand the list of globs to a list of filesystem paths that are
         directories that match the globs. `~` expansion is performed.
     '''
-    return pdglobs
+    return reduce(lambda x, y: x + y, map(glob, map(expanduser, pdglobs)))
 
 def test_pdmatches():
     p1  = '/projects/one'

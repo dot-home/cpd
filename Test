@@ -15,4 +15,5 @@ export PATH="${basedir}/bin:$PATH"
 diff -u <<. - <(cpd -l a p 2>&1)
 $HOME/p2/abc
 $HOME/p1/abc
+$HOME/p2/abc
 .
