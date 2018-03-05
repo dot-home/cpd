@@ -41,12 +41,12 @@ The following `cpd` commands will change to:
 Installation
 ------------
 
-### By Hand
+#### By Hand
 
 Copy the `bin/cpd.py` file in to your path and change your `~/.bashrc`
 to include the functions and `complete` setup from `dot/bashrc.inb4`.
 
-### As a [dot-home] Module
+#### As a [dot-home] Module
 
     mkdir -p ~/.home
     cd ~/.home
