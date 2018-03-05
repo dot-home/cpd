@@ -1,6 +1,14 @@
 cpd - Change to Project Directory
 =================================
 
+Platform Support
+----------------
+
+This supports Unix systems with Python 2.x or Python 3.x available. It
+has yet to be tested on Windows (`cmd`, PowerShell and MinGW Bash)
+systems.
+
+
 Usage
 -----
 
@@ -47,4 +55,40 @@ to include the functions and `complete` setup from `dot/bashrc.inb4`.
     ~/.home/_dot-home/bin/dot-home-setup
 
 
+Testing and Development
+-----------------------
+
+This is an example of a [dot-home] module containing an application
+that resides entirely in a single file (in this case, `bin/cpd.py`)
+with no supporting libraries required beyond the standard library that
+comes with the application's language.
+
+The test framework requires the `virtualenv` Python package in order
+to set up the rest of the test environment. Normally we install this
+using `pip install --user virtualenv` after installing `pip` via
+either OS packages or by hand.
+
+The important development files and directories are:
+
+* `Test` uses `activate` to set up and activate the virtual
+  environment and then runs the unit and functional test suites.
+* `activate`, when sourced in a Bash shell (`. activate`), will
+  set up the virtual environment if necessary and change your command
+  line environment to use it. You can then run the code and tests from
+  the command line.
+* `requirements.txt` contains the list of Python packages used by the
+  test framework. (None of these are required by the script itself.)
+* `t/` contains test data.
+
+
+Authors
+-------
+
+* Curt J. Sampson <cjs@cynic.net> github:[0cjs]
+* Nishant Rodrigues <nishantjr@gmail.com> github:[nishantjr]
+
+
+
 [dot-home]: https://github.com/dot-home/_dot-home
+[nishantjr]: https://github.com/nishantjr
+[0cjs]: https://github.com/0cjs
