@@ -2,6 +2,7 @@
 
 from argparse import ArgumentParser
 from fnmatch import fnmatch
+from functools import reduce
 from glob import glob
 from os import environ
 from os.path import expanduser, split as pathsplit

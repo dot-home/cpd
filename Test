@@ -8,12 +8,16 @@ cd "$basedir"
 echo ===== Unit Tests
 pytest -q bin/cpd.py
 
-echo ===== Functional Test
+echo ===== Functional Tests
 export HOME="${basedir}/t/home"
 export PATH="${basedir}/bin:$PATH"
 . ${basedir}/dot/bashrc.inb4
+
 diff -u <<. - <(cpd -l a p 2>&1)
 $HOME/p2/abc
 $HOME/p1/abc
 $HOME/p2/abc
 .
+
+#   Lint pass for 2- vs. 3-isms
+python -3 -Qwarnall -W error ${basedir}/bin/cpd.py >/dev/null
