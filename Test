@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -e -o pipefail
+trap 'e=$?; echo 1>&2 "FAILED!"; exit $e' 0
 
 basedir="$(cd "$(dirname "$BASH_SOURCE")" && pwd -P)"
 cd "$basedir"
@@ -21,3 +22,5 @@ $HOME/p2/abc
 
 #   Lint pass for 2- vs. 3-isms
 python -3 -Qwarnall -W error ${basedir}/bin/cpd.py >/dev/null
+
+trap '' 0
