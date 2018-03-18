@@ -29,11 +29,11 @@ def pdmatches(component_globs):     # !!! Curried
         that have components matching all `component_globs`. Each
         component_glob has an implied `*` at the end.
     '''
-    return(lambda project_paths:
-        filter(
-            lambda path:
-                all(glob_match(path, glob) for glob in component_globs),
-            project_paths))
+    def match_paths(project_paths):
+        return filter(lambda path: all(glob_match(path, glob)
+                                       for glob in component_globs),
+                      project_paths)
+    return match_paths
 
 def glob_match(path, glob):
     return any(fnmatch(component, glob + '*')
