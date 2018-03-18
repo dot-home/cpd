@@ -10,25 +10,30 @@ import sys
 
 project_path_globs_file = '~/.config/cpd/project-paths'
 
+def flatten(xs):
+    return sum(xs, [])     # Monads are handy!
+                           # https://stackoverflow.com/a/952946/107294
+
 def readconfig():
     with open(expanduser(project_path_globs_file), 'r') as f:
         return map(str.strip, f.readlines())
 
-def expand_pdglobs(pdglobs):
-    ''' Expand the list of globs to a list of filesystem paths that are
-        directories that match the globs. `~` expansion is performed.
+def expand_pdglob(pdglob):
+    ''' Expand the glob pattern to a list of filesystem paths that are
+        directories that match the glob. `~` expansion is performed.
     '''
-    return reduce(lambda x, y: x + y, map(glob, map(expanduser, pdglobs)))
+    return glob(expanduser(pdglob))
 
-def pdmatches(project_paths, component_globs):
-    ''' Return all paths from `project_paths` that have components
-        matching all `component_globs`. Each component_glob has an
-        implied `*` at the end.
+def pdmatches(component_globs):     # !!! Curried
+    ''' Return a function that will return all paths from `project_paths`
+        that have components matching all `component_globs`. Each
+        component_glob has an implied `*` at the end.
     '''
-    return filter(
-        lambda path:
-            all(glob_match(path, glob) for glob in component_globs),
-        project_paths)
+    return(lambda project_paths:
+        filter(
+            lambda path:
+                all(glob_match(path, glob) for glob in component_globs),
+            project_paths))
 
 def glob_match(path, glob):
     return any(fnmatch(component, glob + '*')
@@ -64,7 +69,8 @@ def main():
 
     separator = '\n'
     if args.complete_words: separator = '\0'
-    for match in pdmatches(expand_pdglobs(readconfig()), args.component_glob):
+    pathss = map(expand_pdglob, readconfig())
+    for match in flatten(map(pdmatches(args.component_glob), pathss)):
         sys.stdout.write(match)
         sys.stdout.write(separator)
 

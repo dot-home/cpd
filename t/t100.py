@@ -1,16 +1,25 @@
 from cpd import *
 
+def test_flatten():
+    assert ['a', 1, 'b', 2] == flatten([['a', 1], ['b', 2]])
+
+def test_expand_pdglob():
+    #   This relies on CWD being set to the dir above `t/`
+    #   and $HOME being set to `t/home` in this project.
+    assert 't/home/p1/abc' in expand_pdglob('t/home/*/*')
+    assert expand_pdglob('~/p?')[1][-9:] == 't/home/p2'
+
 def test_pdmatches():
     p1  = '/projects/one'
     p3  = '/projects/three'
     hp1 = '/home/foo/projects/one'
     hp2 = '/home/foo/projects/two'
     pps = [ p1, p3, hp1, hp2 ]
-    assert pdmatches(pps, ['no-match']) == []
-    assert pdmatches(pps, ['on'])       == [ p1, hp1 ]
-    assert pdmatches(pps, ['ho'])       == [ hp1, hp2 ]
-    assert pdmatches(pps, ['on', 'ho']) == [ hp1 ]
-    assert pdmatches(pps, ['on', 'tw']) == [ ]
+    assert pdmatches(['no-match'])(pps) == []
+    assert pdmatches(['on']      )(pps) == [ p1, hp1 ]
+    assert pdmatches(['ho']      )(pps) == [ hp1, hp2 ]
+    assert pdmatches(['on', 'ho'])(pps) == [ hp1 ]
+    assert pdmatches(['on', 'tw'])(pps) == [ ]
 
 def test_glob_match():
     path = '/foo/bar/baz/quux'  # No 'g's in here!
