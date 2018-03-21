@@ -4,7 +4,7 @@ trap 'e=$?; echo 1>&2 "FAILED!"; exit $e' 0
 
 basedir="$(cd "$(dirname "$BASH_SOURCE")" && pwd -P)"
 cd "$basedir"
-. activate
+. activate -q
 
 echo ===== Unit Tests
 PYTHONPATH="$basedir/bin" \
