@@ -79,6 +79,18 @@ The important development files and directories are:
 * `requirements.txt` contains the list of Python packages used by the
   test framework. (None of these are required by the script itself.)
 * `t/` contains test data.
+* `.build/` contains the virtualenv created by `activate` and any
+  other build products. Remove this for a clean build.
+
+#### Python Versions
+
+This is designed to run under both Python 2 and 3. The `Test` script
+builds a Python 2 virtualenv by default, but you can remove `.build/`
+and source `activate` by hand to use whatever version of Python you
+like:
+
+    . activate -p python3       # Force use of Python 3
+    . activate                  # Use virtualenv's default Python version
 
 
 Authors
