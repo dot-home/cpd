@@ -23,6 +23,7 @@ $HOME/p2/abc
 .
 
 #   Lint pass for 2- vs. 3-isms
-python -3 -Qwarnall -W error ${basedir}/bin/cpd.py >/dev/null
+[[ $(python --version 2>&1) = 'Python 2'* ]] \
+    && python -3 -Qwarnall -W error ${basedir}/bin/cpd.py >/dev/null
 
 trap '' 0
