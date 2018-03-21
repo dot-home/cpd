@@ -15,11 +15,14 @@ def test_pdmatches():
     hp1 = '/home/foo/projects/one'
     hp2 = '/home/foo/projects/two'
     pps = [ p1, p3, hp1, hp2 ]
-    assert pdmatches(['no-match'])(pps) == []
-    assert pdmatches(['on']      )(pps) == [ p1, hp1 ]
-    assert pdmatches(['ho']      )(pps) == [ hp1, hp2 ]
-    assert pdmatches(['on', 'ho'])(pps) == [ hp1 ]
-    assert pdmatches(['on', 'tw'])(pps) == [ ]
+
+    def pdm(globs, pps): return list(pdmatches(globs)(pps))
+
+    assert pdm(['no-match'], pps) == []
+    assert pdm(['on']      , pps) == [ p1, hp1 ]
+    assert pdm(['ho']      , pps) == [ hp1, hp2 ]
+    assert pdm(['on', 'ho'], pps) == [ hp1 ]
+    assert pdm(['on', 'tw'], pps) == [ ]
 
 def test_glob_match():
     path = '/foo/bar/baz/quux'  # No 'g's in here!

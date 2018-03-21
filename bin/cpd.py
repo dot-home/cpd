@@ -11,8 +11,8 @@ import sys
 project_path_globs_file = '~/.config/cpd/project-paths'
 
 def flatten(xs):
-    return sum(xs, [])     # Monads are handy!
-                           # https://stackoverflow.com/a/952946/107294
+    #   Monads are handy!  https://stackoverflow.com/a/952946/107294
+    return sum(map(list, xs), [])
 
 def readconfig():
     with open(expanduser(project_path_globs_file), 'r') as f:
