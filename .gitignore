@@ -1,4 +1,5 @@
 /.build/
+/bin/__pycache__/
 /bin/cpd.pyc
 /t/__pycache__/
 /tmp/
