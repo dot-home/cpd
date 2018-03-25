@@ -2,8 +2,12 @@
 set -e -o pipefail
 trap 'e=$?; echo 1>&2 "FAILED!"; exit $e' 0
 
+clean=false
+[[ $1 == -C ]] && { clean=true; shift; }
+
 basedir="$(cd "$(dirname "$BASH_SOURCE")" && pwd -P)"
 cd "$basedir"
+$clean && rm -rf .build
 . activate -q -p python2
 
 echo ===== Unit Tests
