@@ -82,11 +82,17 @@ The important development files and directories are:
 * `.build/` contains the virtualenv created by `activate` and any
   other build products. Remove this for a clean build.
 
-#### Clean Builds
+#### Build/Test Arguments
 
 `Test` will reuse any existing Python virtualenv under `.build/`
-unless given the `-C` option, which wipes out the entire `.build/`
-directory to do a clean build.
+unless given `-C` as the _first_ option, which wipes out the entire
+`.build/` directory to do a clean build.
+
+Any additional options will be passed on to `pytest` (between the
+options and the list of files containing tests). This is typically
+used to change verbosity and run test subsets, e.g.
+
+    ./Test -v -v -k flat
 
 #### Python Versions
 

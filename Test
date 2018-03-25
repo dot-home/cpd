@@ -13,7 +13,7 @@ $clean && rm -rf .build
 echo ===== Unit Tests
 PYTHONPATH="$basedir/bin" \
 HOME="${basedir}/t/home" \
-    pytest -q t/t[0-9]*.py
+    pytest -q "$@" t/t[0-9]*.py
 
 echo ===== Functional Tests
 export HOME="${basedir}/t/home"
