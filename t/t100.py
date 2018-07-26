@@ -32,27 +32,27 @@ def test_pathcomponents():
     assert p('/a/b/c/d/e')      == ['a', 'b', 'c', 'd', 'e']
 
 @pytest.mark.parametrize('globs, path, rkey', [
-    #   Sort key is '0' for match, '1' for not, reversed
-    (['a'       ],  '/charlie/bravo/alpha',     '011'),
-    (['a'       ],  '/alpha/bravo/alpha',       '010'),
-    (['b'       ],  '/bravo/bravo/bravo',       '000'),
-    (['a', 'b'  ],  '/bravo/alpha/charlie',     '100'),
-    (['a'       ],  '/foo/bravo/alpha',         '011'),
-    (['b'       ],  '/bravo/bravo/bravo',       '000'),
-    (['a', 'b'  ],  '/bravo/alpha/charlie',     '100'),
+    #   Sort key is '+' for match, '_' for not, reversed
+    (['a'       ],  '/charlie/bravo/alpha',     '+__'),
+    (['a'       ],  '/alpha/bravo/alpha',       '+_+'),
+    (['b'       ],  '/bravo/bravo/bravo',       '+++'),
+    (['a', 'b'  ],  '/bravo/alpha/charlie',     '_++'),
+    (['a'       ],  '/foo/bravo/alpha',         '+__'),
+    (['b'       ],  '/bravo/bravo/bravo',       '+++'),
+    (['a', 'b'  ],  '/bravo/alpha/charlie',     '_++'),
 
-    pytest.param(['a', 'al' ], '/bravo/alpha/charlie', '101',
+    pytest.param(['a', 'al' ], '/bravo/alpha/charlie', '_+_',
         marks=pytest.mark.xfail(strict=True, reason='bug: both globs match'
             ' but we return just the first glob that matched, internally')),
 
     #   Glob testing
-    (['',       ],  '/alpha/bravo/charlie',     '111'), # XXX no matches?
-    (['?r',     ],  '/alpha/bravo/charlie',     '101'),
-    (['??a',    ],  '/alpha/bravo/charlie',     '001'),
-    (['a*p',    ],  '/alpha/bravo/charlie',     '110'),
-    (['[ab]',   ],  '/alpha/bravo/charlie',     '100'),
-    (['[ac]',   ],  '/alpha/bravo/charlie',     '010'),
-    (['*[xyz]'  ],  '/nope/yes/aaaz/abxcd',     '0001'),
+    (['',       ],  '/alpha/bravo/charlie',     '___'), # XXX no matches?
+    (['?r',     ],  '/alpha/bravo/charlie',     '_+_'),
+    (['??a',    ],  '/alpha/bravo/charlie',     '++_'),
+    (['a*p',    ],  '/alpha/bravo/charlie',     '__+'),
+    (['[ab]',   ],  '/alpha/bravo/charlie',     '_++'),
+    (['[ac]',   ],  '/alpha/bravo/charlie',     '+_+'),
+    (['*[xyz]'  ],  '/nope/yes/aaaz/abxcd',     '+++_'),
 ])
 def test_makesortkey(globs, path, rkey):
     assert (rkey, path) == (MatchingPath.makesortkey(globs)(path), path)

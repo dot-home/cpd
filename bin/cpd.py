@@ -83,8 +83,8 @@ class MatchingPath():
                 raise MatchingPath.AllGlobsMustMatch()
                 return None # Not all matched
             sortkey = reverse(concat(
-                map(lambda x: '0' if x else '1', globs_and_nones)))
-                #   Match (0) should sort before non-match(1)
+                map(lambda x: '+' if x else '_', globs_and_nones)))
+                #   Match ('+', 43) sorts before non-match('_', 95)
             return sortkey
         return f
 
