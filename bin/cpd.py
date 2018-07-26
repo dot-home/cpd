@@ -8,7 +8,7 @@ from os import environ
 from os.path import expanduser, split as pathsplit
 import sys
 
-project_path_globs_file = '~/.config/cpd/project-paths'
+target_globs_file = '~/.config/cpd/project-paths'
 
 def flatten(xs):
     #   Monads are handy!  https://stackoverflow.com/a/952946/107294
@@ -18,14 +18,14 @@ def reverse(s):
     return s[::-1]
 
 def readconfig():
-    with open(expanduser(project_path_globs_file), 'r') as f:
+    with open(expanduser(target_globs_file), 'r') as f:
         return map(str.strip, f.readlines())
 
-def expand_pdglob(pdglob):
+def expand_target_glob(target_glob):
     ''' Expand the glob pattern to a list of filesystem paths that are
         directories that match the glob. `~` expansion is performed.
     '''
-    return glob(expanduser(pdglob))
+    return glob(expanduser(target_glob))
 
 def pathcomponents(path):
     prefix, component = pathsplit(path)
@@ -103,29 +103,29 @@ class MatchingPath():
 
 def matchandsort(component_globs):
     ''' Taking a list of component_globs (each with implied `*` at end) and
-        (curried) list of project_paths, return a sorted list of MatchingPaths.
+        (curried) list of target_paths, return a sorted list of MatchingPaths.
     '''
     def notNone(x): return x is not None
-    def f(project_paths):
+    def f(target_paths):
         return sorted(filter(notNone,
-                map(MatchingPath.constructor(component_globs), project_paths)))
+                map(MatchingPath.constructor(component_globs), target_paths)))
     return f
 
 def main():
     parser = ArgumentParser(description='''
         Find project directories by matching glob patterns to path components.
 
-        A list of path glob patterns, one per line, is read from `%s`.
-        (`~` is interpreted as your home dir.) Each path in the
-        filesystem matching matching any of these globs is considered
-        a project path.
+        A list of target path glob patterns, one per line, is read
+        from `%s`. (`~` is interpreted as your home dir.) Each path in
+        the filesystem matching matching any of these globs is
+        considered a target path.
 
         A set of component globs is given on the command line, and
-        each project path matching all component globs is printed.
+        each target path matching all component globs is printed.
 
-        ''' % project_path_globs_file)
+        ''' % target_globs_file)
     parser.add_argument('--complete-words', action='store_true', help='''
-        Return list of matching project paths separated by null char.
+        Return list of matching target paths separated by null char.
         (Use `read -d $'\\0' to read these.)
         ''')
     parser.add_argument('component_globs', nargs='*',
@@ -134,7 +134,7 @@ def main():
 
     separator = '\n'
     if args.complete_words: separator = '\0'
-    pathss = map(expand_pdglob, readconfig())
+    pathss = map(expand_target_glob, readconfig())
     for match in flatten(map(matchandsort(args.component_globs), pathss)):
         sys.stdout.write(match.path)
         sys.stdout.write(separator)

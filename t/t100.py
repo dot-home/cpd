@@ -9,11 +9,11 @@ def test_flatten():
 def test_reverse():
     assert    [3,2,1] == reverse([1,2,3])
 
-def test_expand_pdglob():
+def test_expand_target_glob():
     #   This relies on CWD being set to the dir above `t/`
     #   and $HOME being set to `t/home` in this project.
-    assert 't/home/p1/abc' in expand_pdglob('t/home/*/*')
-    assert expand_pdglob('~/p?')[1][-9:] == 't/home/p2'
+    assert 't/home/p1/abc' in expand_target_glob('t/home/*/*')
+    assert expand_target_glob('~/p?')[1][-9:] == 't/home/p2'
 
 def test_pathcomponents():
     p = pathcomponents
