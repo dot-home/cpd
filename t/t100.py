@@ -119,3 +119,25 @@ def test_MatchingPath_constructor():
     assert     m(['b'       ])('/bravo/bravo/bravo')
     assert     m(['a', 'b'  ])('/bravo/alpha/charlie')
     assert not m(['x', 'b'  ])('/bravo/alpha/charlie')
+
+
+test_matchandsort_targetpaths = (
+    '/abc/def/ghi',
+    '/ghi/jkl/mno',
+    '/def/ghi/jkl',
+    '/foo/bar/baz',
+)
+@pytest.mark.parametrize('globs, expected', (
+    # glob          expected first path component
+    (['z'],         []),
+    ([],            ['abc', 'def', 'foo', 'ghi']),
+    (['a'],         ['abc']),
+    (['b'],         ['foo']),
+    (['[am]'],      ['ghi', 'abc']),
+    (['?h',],       ['abc', 'def', 'ghi']),
+))
+def test_matchandsort(globs, expected):
+    ' Functional test of everything outside of actual I/O. '
+    matches = matchandsort(globs, test_matchandsort_targetpaths)
+    assert str(globs) and \
+        expected == map(lambda mp: mp.path[1:4], matches)
