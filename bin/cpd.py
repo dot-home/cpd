@@ -101,15 +101,13 @@ class MatchingPath():
         return (self.sortkey, self.path) < (other.sortkey, other.path)
 
 
-def matchandsort(component_globs):
-    ''' Taking a list of component_globs (each with implied `*` at end) and
-        (curried) list of target_paths, return a sorted list of MatchingPaths.
+def matchandsort(component_globs, target_paths):
+    ''' Taking a list of component_globs (each with implied `*` at end)
+        and list of target_paths, return a sorted list of MatchingPaths.
     '''
     def notNone(x): return x is not None
-    def f(target_paths):
-        return sorted(filter(notNone,
-                map(MatchingPath.constructor(component_globs), target_paths)))
-    return f
+    return sorted(filter(notNone,
+            map(MatchingPath.constructor(component_globs), target_paths)))
 
 def main():
     parser = ArgumentParser(description='''
@@ -135,7 +133,7 @@ def main():
     separator = '\n'
     if args.complete_words: separator = '\0'
     target_paths = flatten(map(expand_target_glob, readconfig()))
-    for match in matchandsort(args.component_globs)(target_paths):
+    for match in matchandsort(args.component_globs, target_paths):
         sys.stdout.write(match.path)
         sys.stdout.write(separator)
 
