@@ -134,8 +134,8 @@ def main():
 
     separator = '\n'
     if args.complete_words: separator = '\0'
-    pathss = map(expand_target_glob, readconfig())
-    for match in flatten(map(matchandsort(args.component_globs), pathss)):
+    target_paths = flatten(map(expand_target_glob, readconfig()))
+    for match in matchandsort(args.component_globs)(target_paths):
         sys.stdout.write(match.path)
         sys.stdout.write(separator)
 

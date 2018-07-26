@@ -21,8 +21,8 @@ export PATH="${basedir}/bin:$PATH"
 . ${basedir}/dot/bashrc.inb4
 
 diff -u <<. - <(cpd -l a p 2>&1)
-$HOME/p2/abc
 $HOME/p1/abc
+$HOME/p2/abc
 $HOME/p2/abc
 .
 
