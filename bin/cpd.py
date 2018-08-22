@@ -28,6 +28,10 @@ def expand_target_glob(target_glob):
     return glob(expanduser(target_glob))
 
 def pathcomponents(path):
+    ''' Given a path of '/'-separated components, return the components.
+        This excludes empty components excepting one at the end if the
+        path ends with '/'.
+    '''
     prefix, component = pathsplit(path)
     if prefix not in ['', '/']:         # Fixed point
         return pathcomponents(prefix) + [component]
