@@ -12,20 +12,40 @@ systems.
 Usage
 -----
 
-This reads a list of target paths (which usually include shell glob
-patterns) from `~/.config/cpd/project-paths` and changes the current
-working directory to the first matched target path that has components
-matching all the glob patterns patterns (with an implied `*` at the
-end, if not explicitly specified) given on the command line.
+`cpd` is configured with a list of _target paths_, usually including
+shell glob patterns, read from `~/.config/cpd/project-paths`. On the
+command line it is given a space-separated set of _target path
+components_ and, optionally, a space- or slash-separated list of
+_subpath components_, the first one of which must start with a slash
+to separate it from the target path components. All components (both
+target path and subpath) may include glob patterns and all components
+have an implicit `*` appended to become prefix globs.
 
-The order of the globs given on the command line is not significant.
-Matches of components closer to the rightmost (deepest) component  in
-the target paths are considered better matches.
+From the set of target path components it finds target paths that
+match all of those components, in any order. Thus, set `{de, b}`
+(expressed as `de b`  or `b de` on the command line) would match
+target path `/alpha/bravo/charlie/delta` because `de*` matches the
+`delta` component and `b*` matches the `bravo` component.
 
-You may use the `-l` option to list all matching target paths in
-priority order.
+Once target paths have been selected, a second search is done for
+paths below these target paths that are directories that match, in
+order, the list of subpath components. Thus, list `gh j` or `gh/j`
+would match a target path that has below it a directory `/ghi/jkl/`,
+but not a target path that has below it only a directory `/jkl/ghi/`
+nor a target path that has below it only a file `/ghi/jkl`.
 
-#### Example
+This produces a final list of matching target paths each of which has
+at least one matching subpath. This is ordered first by the rightmost
+matching components in the target path portion; that is, given target
+path components `{f}`, `/bar/foo` will be considered a better match
+than `/foo/bar`. Within that order, subpath components are ordered
+lexicographically.
+
+If the `-l` option is given to `cpd` these paths will be listed in
+order, otherwise the current working directory will be changed to
+the first path in the list.
+
+#### Target Path Examples
 
 If your `project-paths` contains:
 
@@ -60,6 +80,39 @@ Here are some sample `cpd` commands and their effects:
   `dot-home/_dot-home` and `dot-home/tools` are both lexically earlier
   matches, but they match in the second-right component and thus are
   lower priority.
+
+#### Subpath Examples
+
+Given the following combinations of target path (from `project-paths`)
+and subpath (from the filesystem), separated by spaces for clarity:
+
+    ~/co/github.com/0cjs/proj1          /lib/foo/util
+    ~/co/github.com/0cjs/proj1          /lib/bar/util
+    ~/co/github.com/nishantjr/proj2     /lib/proj2
+    ~/co/github.com/nishantjr/proj2     /data/foo/bar
+
+Here are samples of `cpd` commands and their effects:
+
+* `cpd p /d`  
+  `~/co/github.com/nishantjr/proj2/data`  
+  Only `proj2` has a subdirectory matching `d*`.
+* `cpd p /l`  
+  `~/co/github.com/0cjs/proj1/lib`  
+  Both target paths match and have a matching subpath; `0cjs` has priority.
+* `cpd p /l f u`  
+  `~/co/github.com/0cjs/proj1/lib/foo/util`
+  Subpath components may be separated by spaces, as with target path components.
+* `cpd p /l/f/u`  
+  `~/co/github.com/0cjs/proj1/lib/foo/util`
+  Subpath components also may be separated by slashes instead.
+* `cpd p /l//u`  
+  `~/co/github.com/0cjs/proj1/lib/foo/util`  
+  Subpath components may be empty, becoming just `*`.
+* `cpd /**/util`  
+  `~/co/github.com/0cjs/proj1/lib/foo/util`  
+  'Recursive' globs matching any number of components are allowed.
+  When a list of subpath globs is given, the set of target path
+  globs may be empty.
 
 
 Installation

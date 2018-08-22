@@ -5,7 +5,7 @@ from fnmatch import fnmatch
 from functools import reduce, total_ordering
 from glob import glob
 from os import environ
-from os.path import expanduser, split as pathsplit
+from os.path import expanduser, isdir, split as pathsplit
 import sys
 
 target_globs_file = '~/.config/cpd/project-paths'
@@ -16,6 +16,17 @@ def flatten(xs):
 
 def reverse(s):
     return s[::-1]
+
+def span(p, seq):
+    ''' Return a tuple where the first element is the longest prefix of
+        `seq` satisfying predicate `p` and the second element is the rest.
+    '''
+    i = 0
+    for i, x in enumerate(seq):
+        if not p(x):
+            break
+        i = i+1     # for when we reach end
+    return (seq[0:i], seq[i:])
 
 def readconfig():
     with open(expanduser(target_globs_file), 'r') as f:
@@ -38,31 +49,70 @@ def pathcomponents(path):
     else:
         return [component]
 
+def prefixglob_pathcomponents(path):
+    ''' Given a path of `/`-separated components, make each one a
+        prefix glob by appending `*` to each component that doesn't
+        already have a trailing `*`.
+    '''
+    if path is None:
+        return None
+    if path.startswith('/'):    prefix = '/'    # Seems like a hack!
+    else:                       prefix = ''
+    def starsuffix(s):
+        if s.endswith('*'):     return s
+        else:                   return s + '*'
+    return prefix + '/'.join(map(starsuffix, pathcomponents(path)))
+
 @total_ordering
-class MatchingPath():
-    ''' A path that sorts in 'best match' order. '''
+class MTP():
+    ''' A Matching Target Path and its set of subpaths (if any)
+        that sorts in order of 'best match' of target path.
+    '''
 
     class AllGlobsMustMatch(RuntimeError):      pass
     class Incomparable(RuntimeError):           pass
 
     @staticmethod
-    def constructor(component_globs):
-        ''' Return a constructor function that builds MatchingPath
-            objects. The constructor takes and returns a MatchingPath
-            if all `component_globs` globs match at least one path
-            component, or `None` otherwise.
+    def constructor(tp_component_globs, subpath_glob):
+        ''' Return a constructor function ``c(path) -> MTP | None``
+            that builds `MTP` objects or `None` if not all globs
+            match.  See `__init__()` below for details of the arguments.
         '''
         def cons(path):
             try:
-                return MatchingPath(path, component_globs)
-            except MatchingPath.AllGlobsMustMatch:
+                return MTP(path,
+                    tp_component_globs, prefixglob_pathcomponents(subpath_glob))
+            except MTP.AllGlobsMustMatch:
                 return None
         return cons
 
-    def __init__(self, path, component_globs):
-        self.path = path
-        self.cglobs = set(component_globs)
-        self.sortkey = self.makesortkey(component_globs)(path)
+    def __init__(self, targetpath, tp_component_globs, subpath_glob):
+        ''' targetpath (str):
+                The path against which to match the globs
+            tp_component_globs (collection, order ignored):
+                A collection of glob patterns (``*`` implicitly appended),
+                all of which must match against any component (in any
+                order) of the targetpath.
+            subpath_glob (`str` or `None`):
+                A glob pattern matching all components of a path
+                underneath the targetpath, e.g., ``a*/**/b*``, or
+                `None` if no subpath match should be done.
+        '''
+        self.targetpath = targetpath
+        self.cglobs = set(tp_component_globs)
+        self.sortkey = self.makesortkey(tp_component_globs)(targetpath)
+        self.paths = self.match_subpath_glob(subpath_glob)
+
+    def match_subpath_glob(self, subpath_glob):
+        if subpath_glob is None:
+            return (self.targetpath,)
+        else:
+            paths = []
+            for sp in glob(self.targetpath + '/' + subpath_glob):
+                if isdir(sp): paths.append(sp)
+            if len(paths) == 0:
+                raise MTP.AllGlobsMustMatch()
+            return tuple(sorted(paths))
 
     @staticmethod
     def makesortkey(component_globs):
@@ -84,7 +134,7 @@ class MatchingPath():
             globs_and_nones = list(map(matches_glob, pathcomponents(path)))
             matched_globs = set(globs_and_nones) - set([None])
             if matched_globs != set(component_globs):
-                raise MatchingPath.AllGlobsMustMatch()
+                raise MTP.AllGlobsMustMatch()
                 return None # Not all matched
             sortkey = reverse(concat(
                 map(lambda x: '+' if x else '_', globs_and_nones)))
@@ -98,20 +148,36 @@ class MatchingPath():
 
     def __eq__(self, other):
         self.assertComparable(other)
-        return self.path == other.path
+        return self.targetpath == other.targetpath
 
     def __lt__(self, other):
         self.assertComparable(other)
-        return (self.sortkey, self.path) < (other.sortkey, other.path)
+        return \
+            (self.sortkey, self.targetpath) < (other.sortkey, other.targetpath)
 
+def split_arg_globs(globs):
+    ''' The arguments are a list of globs, the target path components
+        followed by the subpath components. Separate these  and return
+        a tuple of:
+        * a `set` of target path components, and
+        * a subpath of:
+          - `None` if no subpath was given, or
+          - a single `str` with internal slashes separating the
+            subpath components
+    '''
+    prefix, suffix = span(lambda x: x[0] != '/', globs)
+    suffix = '/'.join(suffix)
+    if suffix == '': suffix = None
+    return prefix, suffix
 
 def matchandsort(component_globs, target_paths):
     ''' Taking a list of component_globs (each with implied `*` at end)
         and list of target_paths, return a sorted list of MatchingPaths.
     '''
+    targetpath_globs, subpath_glob = split_arg_globs(component_globs)
+    mpcons = MTP.constructor(targetpath_globs, subpath_glob)
     def notNone(x): return x is not None
-    return sorted(filter(notNone,
-            map(MatchingPath.constructor(component_globs), target_paths)))
+    return sorted(filter(notNone, map(mpcons, target_paths)))
 
 def main():
     parser = ArgumentParser(description='''
@@ -138,8 +204,9 @@ def main():
     if args.complete_words: separator = '\0'
     target_paths = flatten(map(expand_target_glob, readconfig()))
     for match in matchandsort(args.component_globs, target_paths):
-        sys.stdout.write(match.path)
-        sys.stdout.write(separator)
+        for p in match.paths:
+            sys.stdout.write(p)
+            sys.stdout.write(separator)
 
 if __name__ == '__main__':
     main()
