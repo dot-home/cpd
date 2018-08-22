@@ -59,9 +59,19 @@ class MatchingPath():
                 return None
         return cons
 
-    def __init__(self, path, component_globs):
+    def __init__(self, path, component_globs, subpath_glob):
+        ''' Parameters:
+            path:
+                XXX
+            component_globs:
+                XXX
+            subpath_glob:
+                A single glob pattern matching all components of the
+                subpath, e.g., ``a*/**/b*``.
+        '''
         self.path = path
         self.cglobs = set(component_globs)
+        self.subpath_glob = subpath_glob
         self.sortkey = self.makesortkey(component_globs)(path)
 
     @staticmethod

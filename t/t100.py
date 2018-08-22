@@ -69,10 +69,11 @@ def test_makesortkey_notallmatch():
 
 def mp(path):
     ''' Our standard test MatchingPath with a fixed glob.
+        Has no subpath glob; that's tested separately.
         Matching:     bravo, delta
         Non-matching: alpha, charlie, echo
     '''
-    return MatchingPath(path, ['b', 'd'])
+    return MatchingPath(path, ['b', 'd'], None)
 
 def test_MatchingPath_construction():
     ''' A MatchingPath must always have at least one component matching
@@ -87,9 +88,9 @@ def test_MatchingPath_ordering():
     #   XXX This test assumes that all component_globs match a component!
 
     with pytest.raises(MatchingPath.Incomparable):
-        mp('/bravo/delta') == MatchingPath('/bravo/delta', ['b', 'de'])
+        mp('/bravo/delta') == MatchingPath('/bravo/delta', ['b', 'de'], None)
     with pytest.raises(MatchingPath.Incomparable):
-        mp('/bravo/delta') < MatchingPath('/bravo/delta', ['b', 'de'])
+        mp('/bravo/delta') < MatchingPath('/bravo/delta', ['b', 'de'], None)
 
     assert mp('/bravo/delta') == mp('/bravo/delta')
     assert mp('/bravo/delta') != mp('/bravo/delta/charlie')
@@ -120,6 +121,10 @@ def test_MatchingPath_constructor():
     assert     m(['a', 'b'  ])('/bravo/alpha/charlie')
     assert not m(['x', 'b'  ])('/bravo/alpha/charlie')
 
+def test_MatchingPath_constructor_subpathglobs():
+    cons = MatchingPath.constructor(['a', '/b/c', 'd/e'])
+    assert not cons('/bravo/bravo/bravo')
+    assert 'b*/c*/d*/e*' == cons('/foo/bravo/alpha').subpath_glob
 
 test_matchandsort_targetpaths = (
     '/abc/def/ghi',
