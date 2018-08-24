@@ -17,6 +17,16 @@ def flatten(xs):
 def reverse(s):
     return s[::-1]
 
+def span(p, seq):
+    ''' Return a tuple where the first element is the longest prefix of
+        `seq` satisfying predicate `p` and the second element is the rest.
+    '''
+    for i, x in enumerate(seq):
+        if not p(x):
+            break
+        i = i+1
+    return (seq[0:i], seq[i:])
+
 def readconfig():
     with open(expanduser(target_globs_file), 'r') as f:
         return map(str.strip, f.readlines())
@@ -114,13 +124,20 @@ class MatchingPath():
         self.assertComparable(other)
         return (self.sortkey, self.path) < (other.sortkey, other.path)
 
+def split_arg_globs(globs):
+    ''' The arguments are a list of globs, the target path components
+        followed by the subpath components. Separate these  and return
+        the set of target path components and a single glob with
+        internal slashes separating the subpath components.
+    '''
+    prefix, suffix = span(lambda x: x[0] == '/', globs)
+    return prefix, None if len(suffix) == 0 else suffix
 
 def matchandsort(component_globs, target_paths):
     ''' Taking a list of component_globs (each with implied `*` at end)
         and list of target_paths, return a sorted list of MatchingPaths.
     '''
-    targetpath_globs = set(component_globs)
-    subpath_glob = None
+    targetpath_globs, subpath_glob = split_arg_globs(component_globs)
     mpcons = MatchingPath.constructor(targetpath_globs, subpath_glob)
     def notNone(x): return x is not None
     return sorted(filter(notNone, map(mpcons, target_paths)))

@@ -9,6 +9,18 @@ def test_flatten():
 def test_reverse():
     assert    [3,2,1] == reverse([1,2,3])
 
+def test_span():
+    seq = (0, 1, 2, 3)
+    def lt(n): return lambda x: x < n
+    assert ((0,1), (2,3))   == span(lt(2), seq)
+    assert ((0,), (1,2,3))  == span(lt(1), seq)
+    assert ((), (0,1,2,3))  == span(lt(0), seq)
+    assert ((0,1,2,3), ())  == span(lt(4), seq)
+
+    def notstartslash(s): return s[0] != '/'
+    assert (['a','b'], ['/c','d']) == span(notstartslash, ['a', 'b', '/c', 'd'])
+    assert (['a','b', 'c'], [])    == span(notstartslash, ['a', 'b', 'c'])
+
 def test_expand_target_glob():
     #   This relies on CWD being set to the dir above `t/`
     #   and $HOME being set to `t/home` in this project.
