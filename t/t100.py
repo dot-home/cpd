@@ -113,8 +113,8 @@ def test_MatchingPath_ordering():
     assert mp('/alpha/foxtrot/bravo/delta') < mp('/bravo/delta/echo')
     assert mp('/bravo/bravo/delta')         < mp('/bravo/echo/bravo/delta')
 
-def test_MatchingPath_constructor():
-    m = MatchingPath.constructor
+def test_MatchingPath_constructor_nosubpathglobs():
+    def m(tpglobs): MatchingPath.constructor(tpglobs, None)
     assert     m(['a'       ])('/foo/bravo/alpha')
     assert not m(['a'       ])('/bravo/bravo/bravo')
     assert     m(['b'       ])('/bravo/bravo/bravo')

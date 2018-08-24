@@ -46,33 +46,33 @@ class MatchingPath():
     class Incomparable(RuntimeError):           pass
 
     @staticmethod
-    def constructor(component_globs):
-        ''' Return a constructor function that builds MatchingPath
-            objects. The constructor takes and returns a MatchingPath
-            if all `component_globs` globs match at least one path
-            component, or `None` otherwise.
+    def constructor(tp_component_globs, subpath_glob):
+        ''' Return a constructor function ``c(path) -> MatchingPath | None``
+            that builds `MatchingPath` objects or `None` if not all globs
+            match.  See `__init__()` below for details of the arguments.
         '''
         def cons(path):
             try:
-                return MatchingPath(path, component_globs)
+                return MatchingPath(path, tp_component_globs, subpath_glob)
             except MatchingPath.AllGlobsMustMatch:
                 return None
         return cons
 
-    def __init__(self, path, component_globs, subpath_glob):
-        ''' Parameters:
-            path:
-                XXX
-            component_globs:
-                XXX
-            subpath_glob:
-                A single glob pattern matching all components of the
-                subpath, e.g., ``a*/**/b*``.
+    def __init__(self, path, tp_component_globs, subpath_glob):
+        ''' path (str):
+                The path against which to match the globs
+            tp_component_globs (collection, order ignored):
+                A collection of glob patterns (``*`` implicitly appended),
+                all of which must match against any component (in any
+                order) of the target path.
+            subpath_glob (str):
+                A single glob pattern matching all components of a
+                path underneath the target path, e.g., ``a*/**/b*``.
         '''
         self.path = path
-        self.cglobs = set(component_globs)
+        self.cglobs = set(tp_component_globs)
         self.subpath_glob = subpath_glob
-        self.sortkey = self.makesortkey(component_globs)(path)
+        self.sortkey = self.makesortkey(tp_component_globs)(path)
 
     @staticmethod
     def makesortkey(component_globs):
@@ -119,9 +119,11 @@ def matchandsort(component_globs, target_paths):
     ''' Taking a list of component_globs (each with implied `*` at end)
         and list of target_paths, return a sorted list of MatchingPaths.
     '''
+    targetpath_globs = set(component_globs)
+    subpath_glob = None
+    mpcons = MatchingPath.constructor(targetpath_globs, subpath_glob)
     def notNone(x): return x is not None
-    return sorted(filter(notNone,
-            map(MatchingPath.constructor(component_globs), target_paths)))
+    return sorted(filter(notNone, map(mpcons, target_paths)))
 
 def main():
     parser = ArgumentParser(description='''
