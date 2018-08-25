@@ -3,7 +3,12 @@ set -e -o pipefail
 trap 'e=$?; echo 1>&2 "FAILED!"; exit $e' 0
 
 clean=false
-[[ $1 == -C ]] && { clean=true; shift; }
+unittest_only=false
+while true; do case "$1" in
+    -C)     shift; clean=true;;
+    -U)     shift; unittest_only=true;;
+    *)      break;;
+esac; done
 
 basedir="$(cd "$(dirname "$BASH_SOURCE")" && pwd -P)"
 cd "$basedir"
@@ -14,6 +19,7 @@ echo ===== Unit Tests
 PYTHONPATH="$basedir/bin" \
 HOME="${basedir}/t/home" \
     pytest -q "$@" t/t[0-9]*.py
+$unittest_only && { trap '' 0; exit 0; }
 
 echo ===== Functional Tests
 export HOME="${basedir}/t/home"
