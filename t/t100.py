@@ -17,6 +17,13 @@ def test_span():
     assert ((), (0,1,2,3))  == span(lt(0), seq)
     assert ((0,1,2,3), ())  == span(lt(4), seq)
 
+    #   We return the sequence type we were given
+    assert ([0,1], [2, 3])  == span(lt(2), [0, 1, 2, 3])
+
+    #   Works with empty sequences
+    assert ([], [])         == span(lt(0), [])
+
+    #   Works with string values in sequences
     def notstartslash(s): return s[0] != '/'
     assert (['a','b'], ['/c','d']) == span(notstartslash, ['a', 'b', '/c', 'd'])
     assert (['a','b', 'c'], [])    == span(notstartslash, ['a', 'b', 'c'])
@@ -126,7 +133,7 @@ def test_MatchingPath_ordering():
     assert mp('/bravo/bravo/delta')         < mp('/bravo/echo/bravo/delta')
 
 def test_MatchingPath_constructor_nosubpathglobs():
-    def m(tpglobs): MatchingPath.constructor(tpglobs, None)
+    def m(tpglobs): return MatchingPath.constructor(tpglobs, None)
     assert     m(['a'       ])('/foo/bravo/alpha')
     assert not m(['a'       ])('/bravo/bravo/bravo')
     assert     m(['b'       ])('/bravo/bravo/bravo')
@@ -134,9 +141,23 @@ def test_MatchingPath_constructor_nosubpathglobs():
     assert not m(['x', 'b'  ])('/bravo/alpha/charlie')
 
 def test_MatchingPath_constructor_subpathglobs():
-    cons = MatchingPath.constructor(['a', '/b/c', 'd/e'])
-    assert not cons('/bravo/bravo/bravo')
+    cons = MatchingPath.constructor(['a', '/b/c', 'd/e'], None)
+    assert              not cons('/bravo/bravo/bravo')
+    assert                  cons('/foo/bravo/alpha')
     assert 'b*/c*/d*/e*' == cons('/foo/bravo/alpha').subpath_glob
+
+@pytest.mark.parametrize('input, expected', (
+    ([],                    ([],                None)),
+    (['a'],                 (['a'],             None)),
+    (['a', 'b', 'c'],       (['a', 'b', 'c'],   None)),
+    (['a', 'b', '/c'],      (['a', 'b'],        '/c')),
+    (['a', '/b', 'c'],      (['a'],             '/b/c')),
+    (['/a', 'b', 'c'],      ([],                '/a/b/c')),
+    (['foo', '/bar/baz', 'quux/quux'],
+                            (['foo'],           '/bar/baz/quux/quux')),
+    ))
+def test_split_arg_globs(input, expected):
+    assert expected == split_arg_globs(input)
 
 test_matchandsort_targetpaths = (
     '/abc/def/ghi',

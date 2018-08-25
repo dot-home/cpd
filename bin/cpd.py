@@ -21,10 +21,11 @@ def span(p, seq):
     ''' Return a tuple where the first element is the longest prefix of
         `seq` satisfying predicate `p` and the second element is the rest.
     '''
+    i = 0
     for i, x in enumerate(seq):
         if not p(x):
             break
-        i = i+1
+        i = i+1     # for when we reach end
     return (seq[0:i], seq[i:])
 
 def readconfig():
@@ -75,9 +76,10 @@ class MatchingPath():
                 A collection of glob patterns (``*`` implicitly appended),
                 all of which must match against any component (in any
                 order) of the target path.
-            subpath_glob (str):
-                A single glob pattern matching all components of a
-                path underneath the target path, e.g., ``a*/**/b*``.
+            subpath_glob (`str` or `None`):
+                A glob pattern matching all components of a path
+                underneath the target path, e.g., ``a*/**/b*``, or
+                `None` if no subpath match should be done.
         '''
         self.path = path
         self.cglobs = set(tp_component_globs)
@@ -127,11 +129,17 @@ class MatchingPath():
 def split_arg_globs(globs):
     ''' The arguments are a list of globs, the target path components
         followed by the subpath components. Separate these  and return
-        the set of target path components and a single glob with
-        internal slashes separating the subpath components.
+        a tuple of:
+        * a `set` of target path components, and
+        * a subpath of:
+          - `None` if no subpath was given, or
+          - a single `str` with internal slashes separating the
+            subpath components
     '''
-    prefix, suffix = span(lambda x: x[0] == '/', globs)
-    return prefix, None if len(suffix) == 0 else suffix
+    prefix, suffix = span(lambda x: x[0] != '/', globs)
+    suffix = '/'.join(suffix)
+    if suffix == '': suffix = None
+    return prefix, suffix
 
 def matchandsort(component_globs, target_paths):
     ''' Taking a list of component_globs (each with implied `*` at end)
