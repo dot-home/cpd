@@ -5,7 +5,7 @@ from fnmatch import fnmatch
 from functools import reduce, total_ordering
 from glob import glob
 from os import environ
-from os.path import expanduser, split as pathsplit
+from os.path import expanduser, isdir, split as pathsplit
 import sys
 
 target_globs_file = '~/.config/cpd/project-paths'
@@ -83,22 +83,30 @@ class MatchingPath():
                 return None
         return cons
 
-    def __init__(self, path, tp_component_globs, subpath_glob):
-        ''' path (str):
+    def __init__(self, targetpath, tp_component_globs, subpath_glob):
+        ''' targetpath (str):
                 The path against which to match the globs
             tp_component_globs (collection, order ignored):
                 A collection of glob patterns (``*`` implicitly appended),
                 all of which must match against any component (in any
-                order) of the target path.
+                order) of the targetpath.
             subpath_glob (`str` or `None`):
                 A glob pattern matching all components of a path
-                underneath the target path, e.g., ``a*/**/b*``, or
+                underneath the targetpath, e.g., ``a*/**/b*``, or
                 `None` if no subpath match should be done.
         '''
-        self.path = path
+        self.targetpath = targetpath
         self.cglobs = set(tp_component_globs)
-        self.subpath_glob = subpath_glob
-        self.sortkey = self.makesortkey(tp_component_globs)(path)
+        self.sortkey = self.makesortkey(tp_component_globs)(targetpath)
+        self.path = self.match_subpath_glob(subpath_glob)
+
+    def match_subpath_glob(self, subpath_glob):
+        if subpath_glob is None:
+            return self.targetpath
+        else:
+            for sp in glob(self.targetpath + '/' + subpath_glob):
+                if isdir(sp): return sp
+        raise MatchingPath.AllGlobsMustMatch()
 
     @staticmethod
     def makesortkey(component_globs):
@@ -134,11 +142,12 @@ class MatchingPath():
 
     def __eq__(self, other):
         self.assertComparable(other)
-        return self.path == other.path
+        return self.targetpath == other.targetpath
 
     def __lt__(self, other):
         self.assertComparable(other)
-        return (self.sortkey, self.path) < (other.sortkey, other.path)
+        return \
+            (self.sortkey, self.targetpath) < (other.sortkey, other.targetpath)
 
 def split_arg_globs(globs):
     ''' The arguments are a list of globs, the target path components

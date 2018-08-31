@@ -151,10 +151,11 @@ def test_MatchingPath_constructor_nosubpathglobs():
     assert     m(['a', 'b'  ])('/bravo/alpha/charlie')
     assert not m(['x', 'b'  ])('/bravo/alpha/charlie')
 
+@pytest.mark.xfail(reason='we can no longer create with no subpathglob')
 def test_MatchingPath_constructor_subpathglobs():
     cons = MatchingPath.constructor(['a'], '/b/c/d/e')
     assert                  not cons('/bravo/bravo/bravo')
-    assert                      cons('/foo/bravo/alpha')
+    assert                  not cons('/foo/bravo/alpha') # no subpath match
     assert '/b*/c*/d*/e*'    == cons('/foo/bravo/alpha').subpath_glob
 
 @pytest.mark.parametrize('input, expected', (
@@ -189,4 +190,4 @@ def test_matchandsort(globs, expected):
     ' Functional test of everything outside of actual I/O. '
     matches = matchandsort(globs, test_matchandsort_targetpaths)
     assert str(globs) and \
-        expected == map(lambda mp: mp.path[1:4], matches)
+        expected == map(lambda mp: mp.targetpath[1:4], matches)
