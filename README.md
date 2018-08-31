@@ -18,24 +18,26 @@ command line it is given a space-separated set of _target path
 components_ and, optionally, a space- or slash-separated list of
 _subpath components_, the first one of which must start with a slash
 to separate it from the target path components. All components (both
-target path and subpath) may include glob patterns and all have an
-implicit `*` appended to become prefix globs.
+target path and subpath) may include glob patterns and all components
+have an implicit `*` appended to become prefix globs.
 
 From the set of target path components it finds target paths that
-match all of those components, in any order. Thus, set `(a de)` would
-match target path `/xyz/def/abc/ghi` because `a*` matches the `abc`
+match all of those components, in any order. Thus, set `{a, de}`
+(expressed as `a de`  or `de a` on the command line) would match
+target path `/xyz/def/abc/ghi` because `a*` matches the `abc`
 component and `de*` matches the `def` component.
 
 Once target paths have been selected, a second search is done for
-paths below these target paths that match, in order, the list of
-subpath components. Thus, list `[gh j]` would match a target path that
-has `/ghi/jkl` below it but not a target path that has `/jkl/ghi`
-below it.
+paths below these target paths that are directories that match, in
+order, the list of subpath components. Thus, list `gh j` or `gh/j`
+would match a target path that has below it a directory `/ghi/jkl/`,
+but not a target path that has below it directory `/jkl/ghi/` nor file
+`/ghi/jkl`.
 
 This produces a final list of paths each being a matching target path
 plus subpath. This is ordered first by the rightmost matching
 components in the target path portion; that is, given target path
-components `(f)` `/bar/foo` will be considered a better match than
+components `{f}` `/bar/foo` will be considered a better match than
 `/foo/bar`. Within that order, subpath components are ordered
 lexicographically.
 
