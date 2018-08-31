@@ -26,10 +26,18 @@ export HOME="${basedir}/t/home"
 export PATH="${basedir}/bin:$PATH"
 . ${basedir}/dot/bashrc.inb4
 
+#   Without subpath
 diff -u <<. - <(cpd -l a p 2>&1)
 $HOME/p1/abc
 $HOME/p2/abc
 $HOME/p2/abc
+.
+
+#   With subpath
+diff -u <<. - <(cpd -l a /[dg])
+$HOME/p1/abc/def
+$HOME/p1/abc/ghi
+$HOME/q1/abc/ghi
 .
 
 #   Lint pass for 2- vs. 3-isms
