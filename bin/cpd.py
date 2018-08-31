@@ -49,6 +49,19 @@ def pathcomponents(path):
     else:
         return [component]
 
+def pathcomp_prefixglob(path):
+    ''' Given a `/`-separated path, add a trailing `*` to each path
+        component that doesn't already have one.
+    '''
+    if path is None:
+        return None
+    if path.startswith('/'):    prefix = '/'    # Seems like a hack!
+    else:                       prefix = ''
+    def starsuffix(s):
+        if s.endswith('*'):     return s
+        else:                   return s + '*'
+    return prefix + '/'.join(map(starsuffix, pathcomponents(path)))
+
 @total_ordering
 class MatchingPath():
     ''' A path that sorts in 'best match' order. '''
@@ -64,7 +77,8 @@ class MatchingPath():
         '''
         def cons(path):
             try:
-                return MatchingPath(path, tp_component_globs, subpath_glob)
+                return MatchingPath(path,
+                    tp_component_globs, pathcomp_prefixglob(subpath_glob))
             except MatchingPath.AllGlobsMustMatch:
                 return None
         return cons

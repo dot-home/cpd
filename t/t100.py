@@ -50,6 +50,17 @@ def test_pathcomponents():
     assert p('/foo///bar/')     == ['foo', 'bar', '']
     assert p('/a/b/c/d/e')      == ['a', 'b', 'c', 'd', 'e']
 
+@pytest.mark.parametrize('input, expected', (
+    (None,      None),
+    ('/a/b',    '/a*/b*'),
+    ('/a*/b',   '/a*/b*'),
+    ('/a*/b*',  '/a*/b*'),
+    ('/',       '/*'),
+    ('/a/',     '/a*/*'),
+    ))
+def test_pathcomp_prefixglob(input, expected):
+    assert expected == pathcomp_prefixglob(input)
+
 @pytest.mark.parametrize('globs, path, rkey', [
     #   Sort key is '+' for match, '_' for not, reversed
     (['a'       ],  '/charlie/bravo/alpha',     '+__'),
@@ -141,10 +152,10 @@ def test_MatchingPath_constructor_nosubpathglobs():
     assert not m(['x', 'b'  ])('/bravo/alpha/charlie')
 
 def test_MatchingPath_constructor_subpathglobs():
-    cons = MatchingPath.constructor(['a', '/b/c', 'd/e'], None)
-    assert              not cons('/bravo/bravo/bravo')
-    assert                  cons('/foo/bravo/alpha')
-    assert 'b*/c*/d*/e*' == cons('/foo/bravo/alpha').subpath_glob
+    cons = MatchingPath.constructor(['a'], '/b/c/d/e')
+    assert                  not cons('/bravo/bravo/bravo')
+    assert                      cons('/foo/bravo/alpha')
+    assert '/b*/c*/d*/e*'    == cons('/foo/bravo/alpha').subpath_glob
 
 @pytest.mark.parametrize('input, expected', (
     ([],                    ([],                None)),
