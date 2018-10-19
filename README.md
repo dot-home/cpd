@@ -17,9 +17,11 @@ shell glob patterns, read from `~/.config/cpd/project-paths`. On the
 command line it is given a space-separated set of _target path
 components_ and, optionally, a space- or slash-separated list of
 _subpath components_, the first one of which must start with a slash
-to separate it from the target path components. All components (both
-target path and subpath) may include glob patterns and all components
-have an implicit `*` appended to become prefix globs.
+to separate it from the target path components. (The slash does not
+need to be preceeded by a space; i.e., you can use `a/b` for target
+component `a` and subpath component `/b`.) All components (both target
+path and subpath) may include glob patterns and all components have an
+implicit `*` appended to become prefix globs.
 
 From the set of target path components it finds target paths that
 match all of those components, in any order. Thus, set `{de, b}`

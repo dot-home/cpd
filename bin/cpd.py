@@ -165,7 +165,12 @@ def split_arg_globs(globs):
           - a single `str` with internal slashes separating the
             subpath components
     '''
-    prefix, suffix = span(lambda x: x[0] != '/', globs)
+    prefix, suffix = span(lambda x: '/' not in x, globs)
+    if suffix and suffix[0][0] != '/':
+        #   Token combines target- and sub-path
+        tp, suffix[0] = suffix[0].split('/', 1)
+        suffix[0] = '/' + suffix[0]     # '/' was lost in split
+        prefix.append(tp)
     suffix = '/'.join(suffix)
     if suffix == '': suffix = None
     return prefix, suffix

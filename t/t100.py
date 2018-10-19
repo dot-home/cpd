@@ -178,6 +178,8 @@ def test_MTP_constructor_subpathglobs():
     (['/a', 'b', 'c'],      ([],                '/a/b/c')),
     (['foo', '/bar/baz', 'quux/quux'],
                             (['foo'],           '/bar/baz/quux/quux')),
+    (['a/b'],               (['a'],             '/b')),
+    (['a/b', 'c'],          (['a'],             '/b/c')),
     ))
 def test_split_arg_globs(input, expected):
     assert expected == split_arg_globs(input)
