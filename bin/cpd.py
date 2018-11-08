@@ -184,6 +184,12 @@ def matchandsort(component_globs, target_paths):
     def notNone(x): return x is not None
     return sorted(filter(notNone, map(mpcons, target_paths)))
 
+def safeclose(f):
+    try:
+        f.close()
+    except IOError:
+        pass
+
 def main():
     parser = ArgumentParser(description='''
         Find project directories by matching glob patterns to path components.
@@ -213,10 +219,16 @@ def main():
     if args.complete_words: separator = '\0'
     target_paths = flatten(map(expand_target_glob,
         readconfig(args.project_paths_file)))
-    for match in matchandsort(args.component_globs, target_paths):
-        for p in match.paths:
-            sys.stdout.write(p)
-            sys.stdout.write(separator)
+    try:
+        for match in matchandsort(args.component_globs, target_paths):
+            for p in match.paths:
+                sys.stdout.write(p)
+                sys.stdout.write(separator)
+    except IOError:
+        pass
+    finally:
+        safeclose(sys.stdout)
+        safeclose(sys.stderr)
 
 if __name__ == '__main__':
     main()

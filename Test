@@ -40,8 +40,12 @@ $HOME/p1/abc/ghi
 $HOME/q1/abc/ghi
 .
 
-#   Test --project-paths-file option.
-cpd -l --project-paths-file t/long-project-paths \? > /dev/null
+#   Test that we gracefully handle a pipeline process reading our output
+#   terminating before reading it all (IOError: [Errno 32] Broken pipe).
+#   We rely on /usr/share/* being present and having a lot of files under
+#   it to make cpd generate more than 4K of output so we can trigger
+#   the problem.
+cpd -l --project-paths-file t/long-project-paths \? | head -1 > /dev/null
 
 #   Lint pass for 2- vs. 3-isms
 [[ $(python --version 2>&1) = 'Python 2'* ]] \
