@@ -8,7 +8,7 @@ from os import environ
 from os.path import expanduser, isdir, split as pathsplit
 import sys
 
-target_globs_file = '~/.config/cpd/project-paths'
+default_target_globs_file = '~/.config/cpd/project-paths'
 
 def flatten(xs):
     #   Monads are handy!  https://stackoverflow.com/a/952946/107294
@@ -28,7 +28,7 @@ def span(p, seq):
         i = i+1     # for when we reach end
     return (seq[0:i], seq[i:])
 
-def readconfig():
+def readconfig(target_globs_file=default_target_globs_file):
     with open(expanduser(target_globs_file), 'r') as f:
         return map(str.strip, f.readlines())
 
@@ -196,7 +196,11 @@ def main():
         A set of component globs is given on the command line, and
         each target path matching all component globs is printed.
 
-        ''' % target_globs_file)
+        ''' % default_target_globs_file)
+    parser.add_argument('--project-paths-file',
+        default=default_target_globs_file,
+        help='Use a different project path file from the default %s.' \
+            % default_target_globs_file)
     parser.add_argument('--complete-words', action='store_true', help='''
         Return list of matching target paths separated by null char.
         (Use `read -d $'\\0' to read these.)
@@ -207,7 +211,8 @@ def main():
 
     separator = '\n'
     if args.complete_words: separator = '\0'
-    target_paths = flatten(map(expand_target_glob, readconfig()))
+    target_paths = flatten(map(expand_target_glob,
+        readconfig(args.project_paths_file)))
     for match in matchandsort(args.component_globs, target_paths):
         for p in match.paths:
             sys.stdout.write(p)

@@ -40,6 +40,9 @@ $HOME/p1/abc/ghi
 $HOME/q1/abc/ghi
 .
 
+#   Test --project-paths-file option.
+cpd -l --project-paths-file t/long-project-paths \? > /dev/null
+
 #   Lint pass for 2- vs. 3-isms
 [[ $(python --version 2>&1) = 'Python 2'* ]] \
     && python -3 -Qwarnall -W error ${basedir}/bin/cpd.py >/dev/null
