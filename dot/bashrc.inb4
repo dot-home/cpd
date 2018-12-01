@@ -5,8 +5,14 @@ cpd() {
         cpd.py "$@"
     else
         local dir="$(cpd.py "$@" | head -1)"
-        [[ -n $dir ]] || return 1
-        cd "$dir" || return 1
+        [[ -n $dir ]] || {
+            echo 1>&2 "cpd: error: no dir found matching '$@'"
+            return 1
+        }
+        cd "$dir" || {
+            echo 1>&2 "cpd: error: failed to 'cd $dir'"
+            return 1
+        }
         pwd -P 2>&1
     fi
 }
