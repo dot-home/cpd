@@ -134,6 +134,31 @@ to include the functions and `complete` setup from `dot/bashrc.inb4`.
     ~/.home/_dot-home/bin/dot-home-setup
 
 
+Similar Programs
+----------------
+
+The authors were unware of any of the following programs when `cpd`
+was initially written, so they can't be said to have inspired `cpd`.
+However, they may provide inspiration for additional features, or
+possibly be better alternatives to `cpd` for some users.
+
+* [`xd`] \([manpage][xd-man]) is similar in style to the subpaths part
+  of `cpd`. The main differences are:
+  - Search for subpaths starts from only the root and home
+    directories, rather than a configurable set of directories.
+  - Matches are made against all subdirectories of root or home. You
+    cannot specifiy specific sets of directories to match as you can
+    with `cpd`'s target paths, though you can configure wildcard
+    specifications to ignore certain directories.
+  - The subpath can be specified as a single string without slashes
+    (e.g., `ulb` to match `/usr/local/bin`) when the initial match
+    chars are all single characters. (A "generalized" search changes
+    this behaviour in an interesting way.)
+  - When multiple directories match, an interactive prompt appears
+    allowing the user to choose one of up to 62 alternatives with a
+    single keystroke from `[0-9a-zA-Z]`. Selections history is kept.
+
+
 Testing and Development
 -----------------------
 
@@ -195,3 +220,5 @@ Authors
 [dot-home]: https://github.com/dot-home/_dot-home
 [nishantjr]: https://github.com/nishantjr
 [0cjs]: https://github.com/0cjs
+[`xd`]: http://fbb-git.gitlab.io/xd/
+[xd-man]: http://fbb-git.gitlab.io/xd/xdman.html
