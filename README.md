@@ -157,7 +157,11 @@ possibly be better alternatives to `cpd` for some users.
   - When multiple directories match, an interactive prompt appears
     allowing the user to choose one of up to 62 alternatives with a
     single keystroke from `[0-9a-zA-Z]`. Selections history is kept.
-
+* [`xdir.py`] is also similar in style to the subpaths part of `cpd`,
+  but uses a `.` prefix to skip an arbitrary number of subdirectories
+  between the current one and the target, e.g., `x .ut` to change to
+  `dev/com/stellated/util`. (`cpd` requires you to use `**` globs
+  to do this.)
 
 Testing and Development
 -----------------------
@@ -222,3 +226,4 @@ Authors
 [0cjs]: https://github.com/0cjs
 [`xd`]: http://fbb-git.gitlab.io/xd/
 [xd-man]: http://fbb-git.gitlab.io/xd/xdman.html
+[`xdir.py`]: https://nedbatchelder.com/code/utilities/xdir_py.html
