@@ -1,6 +1,12 @@
 cpd - Change to Project Directory
 =================================
 
+Bugs
+----
+
+Currently empty intermediate-directory specifications (`foo//bar`)
+and recursive globs (`foo/**/bar`) do not work.
+
 Platform Support
 ----------------
 
