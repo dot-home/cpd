@@ -1,10 +1,18 @@
+__cpd_command=cpd.py
+if python --version >/dev/null 2>&1 ; then
+    :   # The shebang will work.
+elif python3 --version >/dev/null 2>&1 && which cpd.py >/dev/null; then
+    __cpd_command="python3 $(which cpd.py)"
+fi
+#   Otherwise we still use the shebang and get an appropraite error message.
+
 cpd() {
     local list_mode=false
     [[ $1 = -l ]] && { list_mode=true; shift; }
     if $list_mode; then
-        cpd.py "$@"
+        $__cpd_command "$@"
     else
-        local dir="$(cpd.py "$@" | head -1)"
+        local dir="$($__cpd_command "$@" | head -1)"
         [[ -n $dir ]] || {
             echo 1>&2 "cpd: error: no dir found matching '$@'"
             return 1
@@ -22,6 +30,6 @@ __cpd_complete() {
     COMPREPLY=('')                  # To avoid adding a common prefix
     while read -d $'\0' comp; do
         COMPREPLY+=("$comp")
-    done < <(cpd.py --complete-words "${COMP_WORDS[@]}")
+    done < <($__cpd_command --complete-words "${COMP_WORDS[@]}")
 }
 complete -F __cpd_complete cpd
