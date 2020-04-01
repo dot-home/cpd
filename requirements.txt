@@ -1,3 +1,5 @@
+#   cpd has no (and must not have) any dependencies beyond the Python
+#   standard library. These dependencies are only for the test framework.
 attrs==17.4.0
 pluggy==0.6.0
 py==1.5.2
