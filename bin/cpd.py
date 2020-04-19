@@ -77,8 +77,14 @@ class MatchingPath():
         '''
         def cons(path):
             try:
-                return MatchingPath(path,
-                    tp_component_globs, pathcomp_prefixglob(subpath_glob))
+                targetpath = MatchingPath(path, tp_component_globs, None)
+                if not subpath_glob:
+                    return targetpath
+                else:
+                    subpath = pathcomp_prefixglob(subpath_glob)
+                    # XXX return a separate MatchingPath for each
+                    #   matching subpath here
+                    raise RuntimeError('Write me!')
             except MatchingPath.AllGlobsMustMatch:
                 return None
         return cons
