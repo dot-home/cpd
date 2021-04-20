@@ -2,6 +2,6 @@
 #   standard library. These dependencies are only for the test framework.
 attrs==17.4.0
 pluggy==0.6.0
-py==1.5.2
+py==1.10.0
 pytest==3.3.2
 six==1.11.0
