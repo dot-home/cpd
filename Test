@@ -29,20 +29,20 @@ export HOME="${basedir}/t/home"
 export PATH="${basedir}/bin:$PATH"
 . ${basedir}/dot/bashrc.inb4
 
-#   Without subpath
-diff -u <<. - <(cpd -l a p 2>&1)
-$HOME/p1/abc
-$HOME/p2/abc
-$HOME/p2/abc
+echo '----- without subpath'
+diff -u <<. - <(cpd -l a _cpd_p 2>&1)
+$HOME/_cpd_p1/abc
+$HOME/_cpd_p2/abc
 .
 
-#   With subpath
-diff -u <<. - <(cpd -l a /[dg])
-$HOME/p1/abc/def
-$HOME/p1/abc/ghi
-$HOME/q1/abc/ghi
+echo '----- with subpath'
+diff -u <<. - <(cpd -l _cpd a /[dg])
+$HOME/_cpd_p1/abc/def
+$HOME/_cpd_p1/abc/ghi
+$HOME/_cpd_q1/abc/ghi
 .
 
+echo '----- graceful pipeline fail'
 #   Test that we gracefully handle a pipeline process reading our output
 #   terminating before reading it all (IOError: [Errno 32] Broken pipe).
 #   We rely on /usr/share/* being present and having a lot of files under
@@ -50,7 +50,7 @@ $HOME/q1/abc/ghi
 #   the problem.
 cpd -l --project-paths-file t/long-project-paths \? | head -1 > /dev/null
 
-#   Lint pass for 2- vs. 3-isms
+echo '----- lint for 2- vs. 3-isms'
 [[ $(python --version 2>&1) = 'Python 2'* ]] \
     && python -3 -Qwarnall -W error ${basedir}/bin/cpd.py >/dev/null
 
