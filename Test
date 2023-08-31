@@ -13,7 +13,10 @@ esac; done
 basedir="$(cd "$(dirname "$BASH_SOURCE")" && pwd -P)"
 cd "$basedir"
 $clean && rm -rf .build
-. activate -q -p python2
+#   We default to python2 for testing since this should run anywhere.
+#   You may add your own .python link to the interpreter of your choice.
+[[ -L .python ]] || ln -s $(type -P python2) .python
+source pactivate -q
 
 echo ===== Unit Tests
 PYTHONPATH="$basedir/bin" \
