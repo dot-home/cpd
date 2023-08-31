@@ -203,4 +203,4 @@ def test_matchandsort(globs, expected):
     ' Functional test of everything outside of actual I/O. '
     matches = matchandsort(globs, test_matchandsort_targetpaths)
     assert str(globs) and \
-        expected == map(lambda mp: mp.targetpath[1:4], matches)
+        expected == list(map(lambda mp: mp.targetpath[1:4], matches))
