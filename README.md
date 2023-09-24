@@ -63,9 +63,9 @@ If your `project-paths` contains:
 And this expands to the following target paths on your disk:
 
     ~/co/freedesktop.org/xdg/xdg-user-dirs
-    ~/co/github.com/0cjs/git-tools
+    ~/co/github.com/0cjs/gitcmd-abbrev
     ~/co/github.com/dot-home/_dot-home
-    ~/co/github.com/dot-home/git-tools
+    ~/co/github.com/dot-home/gitcmd-abbrev
     ~/golang/src/github.com/golang/go
     ~/golang/src/github.com/libgit2/git2go
     ~/golang/src/github.com/graphviz/dotty
@@ -75,13 +75,13 @@ Here are some sample `cpd` commands and their effects:
 * `cpd xdg`  
   `~/co/freedesktop.org/xdg/xdg-user-dirs`  
   because it's the only target path with any component matching glob `xdg*`.
-* `cpd *tools`  
-  `~/co/github.com/0cjs/git-tools`  
+* `cpd *brev`  
+  `~/co/github.com/0cjs/gitcmd-abbrev`  
   because it's lexically first of the two target paths with components
-  matching `*tools`.
-* `cpd *tools dot`  
-  `~/co/github.com/dot-home/git-tools`  
-  because it's the only target path matching both `*tools` and `dot*`.
+  matching `*brev`.
+* `cpd *brev dot`  
+  `~/co/github.com/dot-home/gitcmd-abbrev`  
+  because it's the only target path matching both `*brev` and `dot*`.
 * `cpd dot`  
   `~/golang/src/github.com/graphviz/dotty`  
   because 'dotty' is a rightmost component matching `dot*`.
