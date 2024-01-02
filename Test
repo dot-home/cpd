@@ -15,7 +15,13 @@ cd "$basedir"
 $clean && rm -rf .build
 #   We default to python2 for testing since this should run anywhere.
 #   You may add your own .python link to the interpreter of your choice.
-[[ -L .python ]] || ln -s $(type -P python2) .python
+[[ -L .python ]] || {
+    echo "No .python link found: setting test interpreter to python2."
+    py=$(type -P python2) || {
+        echo 1>&2 "ERROR: Failed to find python2"; exit 1; }
+    echo ".python → $py"
+    ln -s "$py" .python
+}
 source pactivate -q
 
 echo ===== Unit Tests
