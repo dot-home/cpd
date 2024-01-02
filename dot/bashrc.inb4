@@ -1,18 +1,40 @@
-__cpd_command=cpd.py
-if python --version >/dev/null 2>&1 ; then
-    :   # The shebang will work.
-elif python3 --version >/dev/null 2>&1 && which cpd.py >/dev/null; then
-    __cpd_command="python3 $(which cpd.py)"
-fi
-#   Otherwise we still use the shebang and get an appropriate error message.
+__cpd_interp=''
+__cpd_interp_setup() {
+    local interp interps="python python3 python2"
+    if [[ -n $MSYSTEM ]]; then
+        #   We try to use `py` only on Windows systems where it is the
+        #   standard wrapper to find the default Python interpreter.
+        #   On many Linux distros `py` is a different program.
+        #   XXX We should probably also check for Cygwin.
+        interps="py $interps"
+    fi
+    for interp in $interps; do
+        if "$interp" --version >/dev/null 2>&1; then
+            __cpd_interp="$interp"
+            break
+        fi
+    done
+}
+__cpd_interp_setup
+unset __cpd_interp_setup
 
 cpd() {
+    [[ -z $__cpd_interp ]] && {
+        echo 1>&2 "cpd: Cannot find python interpreter."
+        return 3
+    }
+    local cpd_py="$(type -P cpd.py)"
+    [[ -z $cpd_py ]] && {
+        echo 1>&2 "cpd: Cannot find cpd.py"
+        return 3
+    }
+
     local list_mode=false
     [[ $1 = -l ]] && { list_mode=true; shift; }
     if $list_mode; then
-        $__cpd_command "$@"
+        "$__cpd_interp" "$cpd_py" "$@"
     else
-        local dir="$($__cpd_command "$@" | head -1)"
+        local dir="$("$__cpd_interp" "$cpd_py" "$@" | head -1)"
         [[ -n $dir ]] || {
             echo 1>&2 "cpd: error: no dir found matching '$@'"
             return 1
@@ -26,10 +48,16 @@ cpd() {
 }
 
 __cpd_complete() {
+    #   Completion silently fails (making attempts to complete do nothing)
+    #   if we can't find the interpreter or cpd.py.
+    [[ -z $__cpd_interp ]] && return 3
+    local cpd_py="$(type -P cpd.py)"
+    [[ -z $cpd_py ]] && return 3
+
     local comp
     COMPREPLY=('')                  # To avoid adding a common prefix
     while read -d $'\0' comp; do
         COMPREPLY+=("$comp")
-    done < <($__cpd_command --complete-words "${COMP_WORDS[@]}")
+    done < <("$__cpd_interp" "$cpd_py" --complete-words "${COMP_WORDS[@]}")
 }
 complete -F __cpd_complete cpd
