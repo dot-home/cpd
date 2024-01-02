@@ -35,6 +35,10 @@ def readconfig(target_globs_file=default_target_globs_file):
 def expand_target_glob(target_glob):
     ''' Expand the glob pattern to a list of filesystem paths that are
         directories that match the glob. `~` expansion is performed.
+
+        You should assume that the results will be in random order.
+        Since Python 3.8 the docs state, "Whether or not the results are
+        sorted depends on the file system."
     '''
     return glob(expanduser(target_glob))
 
