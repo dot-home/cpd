@@ -4,7 +4,7 @@ if python --version >/dev/null 2>&1 ; then
 elif python3 --version >/dev/null 2>&1 && which cpd.py >/dev/null; then
     __cpd_command="python3 $(which cpd.py)"
 fi
-#   Otherwise we still use the shebang and get an appropraite error message.
+#   Otherwise we still use the shebang and get an appropriate error message.
 
 cpd() {
     local list_mode=false
