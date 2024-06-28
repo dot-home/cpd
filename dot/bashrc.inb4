@@ -20,7 +20,7 @@ unset __cpd_interp_setup
 
 cpd() {
     [[ -z $__cpd_interp ]] && {
-        echo 1>&2 "cpd: Cannot find python interpreter."
+        echo 1>&2 "cpd: No Python interpreter found when .bashrc run."
         return 3
     }
     local cpd_py="$(type -P cpd.py)"
